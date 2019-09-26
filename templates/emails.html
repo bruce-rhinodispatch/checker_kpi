@@ -1,0 +1,19 @@
+{% load render_sample %}
+{% render_sample  template="date_form.html" form=form %}
+
+{% if dispatchers_email %}
+  <div class="row" id="wrapper_table_emails">
+   <table class="striped centered col s6 offset-s3">
+   <thead>
+    <th>Nickname</th>
+    <th>Amount of sended emails</th>
+    </thead>
+    {% for dispatcher in dispatchers_email %}
+    <tr>
+        <td>{{dispatcher.nick}}</td>
+        <td>{{dispatcher.amount}}</td>
+    </tr>
+    {% endfor %}
+    </table>
+</div>
+{% endif %}

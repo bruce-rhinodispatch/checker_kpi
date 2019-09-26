@@ -1,0 +1,29 @@
+
+<div class="row" id="wrapper_dates">
+    <form action="" method="post">
+        <div class="col s3 offset-s3">
+        {{ form.start }}
+        </div>
+        <div class="col s3">
+        {{ form.end }}
+        </div>
+        
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+        <input class="waves-effect waves-light btn" type="submit" value="Search!" >
+    </form>
+</div>
+
+<script>
+    
+$(function () {
+  $("#start").datepicker({
+      autoHide: true,
+  });
+});
+    
+$(function () {
+  $("#end").datepicker({
+      autoHide: true,
+  });
+});
+</script>

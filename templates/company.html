@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load navigation_departments %}
+{% load render_sample %}
+
+{% block content %}
+{% navigation_departments main_nav_element second_nav_element  %}
+{% if second_nav_element == "emails" %}
+    {% render_sample  template="emails.html" form=form dispatchers_email=dispatchers_email%}
+{% endif %}
+{% if second_nav_element == "sylectus"  %}
+   
+    {% render_sample template="sylectus.html" form=form dispatchers_sylectus=dispatchers_sylectus%}
+{% endif %}
+{% endblock %}
+
+
+

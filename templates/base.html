@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+{% load static %}
+{% load navigation_companies %}
+
+
+<html>
+
+<head>
+<meta charset="utf-8">
+
+
+<!-- materialize CSS and jQuery -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datepicker/0.6.5/datepicker.min.css" integrity="sha256-b88RdwbRJEzRx95nCuuva+hO5ExvXXnpX+78h8DjyOE=" crossorigin="anonymous" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/js/materialize.min.js"></script>
+   <link rel="stylesheet" type="text/css" href={% static 'styles.css' %}>
+    <title>{% block head_title %}{% endblock %}</title>
+    {% block extra_head %}
+    {% endblock %}
+</head>
+
+<body>
+
+    <!-- Верхняя менюшка -->
+    <nav class="nav-wrapper indigo z-depth-0" id="top_nav_bar">
+        <ul class="right">
+            {% if user.is_authenticated %}
+            <li><a href="{% url 'account_logout' %}">Выйти</a></li>
+            {% else %}
+            <li><a href="{% url 'account_login' %}">Войти</a></li>
+            <li><a href="{% url 'account_signup' %}">Регистрация</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <!-- боковая менюшка -->
+    {% if user.is_authenticated %}
+    {% navigation_companies main_nav_element %}
+    {% endif %}
+
+
+    <!-- content -->
+    <div class="content">
+            {% if messages %}
+            {% for message in messages %}
+            {% if message.tags == 'success'%}
+            <script>
+                M.toast({
+                    html: "{{message}}",
+                    classes: 'green rounded',
+                    displayLength: 3000
+                });
+            </script>
+            {% elif message.tags == 'info'%}
+            <script>
+                M.toast({
+                    html: "{{message}}",
+                    classes: 'blue rounded',
+                    displayLength: 3000
+                });
+            </script>
+            {% elif message.tags == 'warning'%}
+            <script>
+                M.toast({
+                    html: "{{message}}",
+                    classes: 'orange rounded',
+                    displayLength: 5000
+                });
+            </script>
+            {% elif message.tags == 'error'%}
+            <script>
+                M.toast({
+                    html: "{{message}}",
+                    classes: 'red rounded',
+                    displayLength: 5000
+                });
+            </script>
+            {% endif %}
+            {% endfor %}
+            {% endif %}
+        {% block body %}
+        {% endblock %}
+
+        {% block content %}
+        {% endblock %}
+
+        {% block extra_body %}
+        {% endblock %}
+        
+        
+
+</div>
+</body>
+  
+   <!-- Fengyuan Chen's Datepicker -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/datepicker/0.6.5/datepicker.min.js" integrity="sha256-/7FLTdzP6CfC1VBAj/rsp3Rinuuu9leMRGd354hvk0k=" crossorigin="anonymous"></script>
+</html>

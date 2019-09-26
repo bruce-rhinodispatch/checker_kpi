@@ -1,0 +1,77 @@
+/* The side navigation menu */
+.sidebar {
+  margin: 0;
+  padding: 0;
+  width: 200px;
+  background-color: #f1f1f1;
+  position: fixed;
+  height: 100%;
+  overflow: auto;
+  
+}
+
+/* Sidebar links */
+.sidebar a {
+  display: block;
+  color: black;
+  padding: 16px;
+  text-decoration: none;
+}
+
+/* Active/current link */
+.sidebar a.active {
+  background-color: #303f9f ;
+  color: white;
+}
+
+/* Links on mouse-over */
+.sidebar a:hover:not(.active) {
+  background-color: #555;
+  color: white;
+}
+
+/* Page content. The value of the margin-left property should match the value of the sidebar's width property */
+div.content {
+  margin-left: 200px;
+    margin-top: 64px;
+  padding: 0px 16px;
+  height: 1000px;
+}
+
+#toast-container {
+  top: auto !important;
+  right: auto !important;
+  bottom:91%;
+  left:35%;
+}
+
+.tabs {
+    display: flex;
+    justify-content: center;
+}
+
+.tabs .indicator{
+  background-color: #1a237e;
+}
+.tabs .tab a:focus, .tabs .tab a:focus.active{
+  background: transparent;
+}
+
+#wrapper_dates{
+    margin-top: 20px;
+}
+
+#top_nav_bar {
+    display: block;
+    position: fixed;
+    top:0;
+    left: 0;
+    z-index: 5;
+    
+}
+
+#end, #start {
+    text-align: center;
+}
+
+

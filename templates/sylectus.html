@@ -1,0 +1,36 @@
+{% load render_sample %}
+{% load if_none_set_0 %}
+{% render_sample  template="date_form.html" form=form %}
+
+{% if dispatchers_sylectus %}
+  <div class="row" id="wrapper_table_sylectus">
+   <table class="striped centered">
+   <thead>
+    <th>Nickname</th>
+    <th>Order Created</th>
+    <th>Order Updated</th>
+    <th>Dispatched</th>
+    <th>Cancel Order</th>
+    <th>Cancel Travel Order</th>
+    <th>Change PD Customer</th>
+    <th>ETA Changed</th>
+    <th>Change BOL</th>
+    <th>Total</th>
+    </thead>
+    {% for dispatcher in dispatchers_sylectus %}
+    <tr>
+        <td>{{dispatcher.nick}}</td>
+           <td>{{dispatcher.actions.Order_Created|if_none_set_0}}</td>
+           <td>{{dispatcher.actions.Order_Updated|if_none_set_0}}</td>
+           <td>{{dispatcher.actions.Dispatched|if_none_set_0}}</td>
+           <td>{{dispatcher.actions.Cancel_Order|if_none_set_0}}</td>
+           <td>{{dispatcher.actions.Cancel_Travel_Order|if_none_set_0}}</td>
+           <td>{{dispatcher.actions.Change_PD_Customer|if_none_set_0}}</td>
+           <td>{{dispatcher.actions.ETA_Changed|if_none_set_0}}</td>
+           <td>{{dispatcher.actions.Change_BOL|if_none_set_0}}</td>
+           <th>{{dispatcher.actions.Total|if_none_set_0}}</th>
+    </tr>
+    {% endfor %}
+    </table>
+</div>
+{% endif %}

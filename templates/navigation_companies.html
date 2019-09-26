@@ -1,0 +1,12 @@
+
+<div class="sidebar">
+   {{selected}}
+    {% for company in main_nav_elements %}
+      <a {% if company.name == main_nav_element_selected %} class="active" {% endif %}href="{{ company.get_absolute_url}}">{{ company.name }}</a>
+    {% endfor %}
+    {% if main_nav_element_selected == "Settings"%}
+    <a class="active"  href="{% url 'settings' %}" >Settings</a>
+    {% else %}
+    <a href="{% url 'settings' %}">Settings</a>
+    {% endif %}
+</div>
