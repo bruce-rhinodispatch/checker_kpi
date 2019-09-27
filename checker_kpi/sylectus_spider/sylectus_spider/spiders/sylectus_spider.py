@@ -81,7 +81,7 @@ class SylectusSpider(scrapy.Spider):
                 user = user.strip()
             action = row.css('td:nth-child(8)::text').extract_first()
             if action is not None:
-                action = action.strip().replace(" ", "_")
+                action = action.strip().replace(" ", "_").replace(".", "").replace("#", "").replace("  ", " ")
             actions = actions_by_user.get(user, None)
             if actions is None:
                 actions_by_user[user] = {}
