@@ -2,14 +2,12 @@ import base64
 import pickle
 import os
 import re
-import sys
-from checker_kpi import models
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from pprint import pprint
 import datetime
-
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def get_creds():
     scopes = ['https://www.googleapis.com/auth/gmail.readonly']
@@ -18,10 +16,12 @@ def get_creds():
     creds = flow.run_local_server(port=0)
     service = build('gmail', 'v1', credentials=creds)
     email = service.users().getProfile(userId='me').execute()['emailAddress']
-    model = models.Emails.objects.filter(email=email).first()
-    model.creds = pickle.dumps(creds)
-    model.save()
-    print(f"We added creds to {email}")
+    with open('creds.pickle', 'rb') as token:
+        creds_pickl = pickle.load(token)
+    creds_pickl[email] = creds
+    with open('creds.pickle', 'wb') as token:
+        pickle.dump(creds_pickl, token)
+    print(f"We added creds for {email}")
 
 
 class CheckerEmails:
@@ -32,8 +32,9 @@ class CheckerEmails:
         email_creds = self._service.users().getProfile(userId='me').execute()['emailAddress']
         if email != email_creds:
             raise Exception(f"Credentials are for {email_creds} but expected for {email}")
+        self._email = email
         self._labels_not_to_check = ['CHAT']
-        self._regexp = re.compile(r"(On [A-Z][a-z]{2}, [A-Z][a-z]{2} (\d){1,2}, (\d){4} at (\d){1,2}:\d\d (AM|PM) (.|\s)+wrote)")
+        self._regexp = re.compile(r"(On [A-Z][a-z]{2}, [A-Z][a-z]{2} (\d){1,2}, (\d){4} at (\d){1,2}:\d\d (AM|PM) (.|\s){0,70}@(.|\s){0,70}wrote:)")
 
     @staticmethod
     def get_body_from_part(part):
@@ -63,6 +64,14 @@ class CheckerEmails:
                 for header in message['payload']['headers']:
                     if header['name'] == 'Message-ID':
                         message_id_for_gui = header['value']
+
+                # проверяю если емейл был отправлен с нужной мне почты
+                for header in message['payload']['headers']:
+                    if header['name'] == 'From':
+                        email_from = header['value'].split('<')[1].split('>')[0]
+
+                if email_from != self._email:
+                    continue
 
                 body = ""
                 # если часть в письме 1
@@ -110,38 +119,14 @@ class CheckerEmails:
 
 
 
-
-
-
-
-
 if __name__ == "__main__":
-    from django.conf import settings
-    settings.configure(DEBUG=True)
-
-    company_to_check = 1
-    email = "bruce@rhinodispatch.com"
-    email_model = models.Emails.objects.filter(email=email).first()
-    if email_model is None:
-        raise Exception(f"We don't have email: {email} in our data base")
-    creds = pickle.loads(email_model.creds)
-    if not creds:
-        get_creds()
-    if creds.expired:
-        creds.refresh(Request())
-        email_model.creds = pickle.dumps(creds)
-        email_model.save()
-
-    dispatchers_models = models.OperationsUsers.objects.filter(company=company_to_check)
-    dispatchers = [{'dispatcher': dispatcher.nick_name, 'amount': 0} for dispatcher in dispatchers_models]
-    checker = CheckerEmails(creds, email)
-    now = datetime.datetime.now()
-    dates = {'start': now-datetime.timedelta(days=2), 'end': now}
-    checker.check_emails_by_dispatchers(dispatchers, dates)
-
-
-
-
-
-
-
+    from pprint import pprint
+    with open('creds.pickle', 'rb') as token:
+        creds_pickl = pickle.load(token)
+    creds = creds_pickl['bruce@rhinodispatch.com']
+    service = build('gmail', 'v1', credentials=creds)
+    query = f"from:me -label:CHAT after:2018/09/24 before:2019/09/28"
+    mails_raw = service.users().messages().list(userId='me', q=query).execute()
+    message_id = mails_raw['messages'][0]['id']
+    message = service.users().messages().get(userId='me', id=message_id, format='full').execute()
+    pprint(message)
