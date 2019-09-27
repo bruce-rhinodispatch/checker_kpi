@@ -64,11 +64,11 @@ def company_emails(request, company_name, department='emails'):
             dispatchers_models = models.OperationsUsers.objects.filter(company=company_to_check)
             dispatchers_email = [{'nick': dispatcher.nick_name, 'amount': 0} for dispatcher in dispatchers_models]
             for email in emails_to_check_with_creds:
+                print(f"checking for {email.email}")
                 creds = creds_pickl[email.email]
-
                 checker = CheckerEmails(creds, email.email)
                 checker.check_emails_by_dispatchers(dispatchers_email, date_dict)
-                print(f"checking for {email.email} done")
+
 
 
 
