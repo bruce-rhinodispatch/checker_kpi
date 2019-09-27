@@ -8,7 +8,7 @@ class CompanyAdmin(admin.ModelAdmin):
 
 
 class EmailsAdmin(admin.ModelAdmin):
-    list_display = ('company', 'email', 'check_for_this_email', 'creds')
+    list_display = ('company', 'email', 'check_for_this_email')
 
 
 class OperationsUsersAdmin(admin.ModelAdmin):
