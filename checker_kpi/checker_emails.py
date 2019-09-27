@@ -52,7 +52,8 @@ class CheckerEmails:
         # если ничего не нашло
         if mails_raw['resultSizeEstimate'] == 0:
             return dispatchers
-
+        estimate_emails = mails_raw["resultSizeEstimate"]
+        checked = 0
         # и теперь в цыкле достаем из списка писем котороые подходят по query ид каждого письма
         # и посылаем запрос что бы получить всю информацию по нужному письму
         while True:
@@ -68,7 +69,10 @@ class CheckerEmails:
                 # проверяю если емейл был отправлен с нужной мне почты
                 for header in message['payload']['headers']:
                     if header['name'] == 'From':
-                        email_from = header['value'].split('<')[1].split('>')[0]
+                        try:
+                            email_from = header['value'].split('<')[1].split('>')[0]
+                        except:
+                            print(header['value'])
 
                 if email_from != self._email:
                     continue
@@ -109,12 +113,14 @@ class CheckerEmails:
                     for dispatcher in dispatchers:
                         if dispatcher['nick'] in cleared_body:
                             dispatcher['amount'] += 1
+            checked += len(mails_raw['messages'])
+            print(f"checked {checked} from {estimate_emails}")
             # если больше нет листов для проверки - на выход
             if 'nextPageToken' not in mails_raw:
                 break
             # если есть - потворяем
             page_token = mails_raw['nextPageToken']
-            mails_raw = self._service.users().messages().list(userId='me', pageToken=page_token).execute()
+            mails_raw = self._service.users().messages().list(userId='me', pageToken=page_token, q=query).execute()
 
 
 
@@ -124,9 +130,14 @@ if __name__ == "__main__":
     with open('creds.pickle', 'rb') as token:
         creds_pickl = pickle.load(token)
     creds = creds_pickl['bruce@rhinodispatch.com']
+    emails = 0
     service = build('gmail', 'v1', credentials=creds)
-    query = f"from:me -label:CHAT after:2018/09/24 before:2019/09/28"
+    query = f"(from:me) (-label:CHAT) (after:2019/05/10) (before:2019/09/28)"
     mails_raw = service.users().messages().list(userId='me', q=query).execute()
-    message_id = mails_raw['messages'][0]['id']
-    message = service.users().messages().get(userId='me', id=message_id, format='full').execute()
-    pprint(message)
+    print(f'estimate {mails_raw["resultSizeEstimate"]}')
+    while 'nextPageToken' in mails_raw:
+        emails += len(mails_raw['messages'])
+        page_token = mails_raw['nextPageToken']
+        mails_raw = service.users().messages().list(userId='me', pageToken=page_token, q=query).execute()
+        print(emails)
+    print(f"final result {emails}")
