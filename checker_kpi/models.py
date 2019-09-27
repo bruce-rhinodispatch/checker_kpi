@@ -30,7 +30,6 @@ class SylectusUsers(models.Model):
 class Emails(models.Model):
     company = models.ForeignKey(Company, on_delete=models.PROTECT)
     email = models.CharField(max_length=40, blank=False, unique=True)
-    creds = models.BinaryField(max_length=500, default=b"")
     check_for_this_email = models.BooleanField(blank=False, default=True)
 
     class Meta:
