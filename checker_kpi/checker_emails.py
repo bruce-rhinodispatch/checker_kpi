@@ -141,3 +141,5 @@ if __name__ == "__main__":
         mails_raw = service.users().messages().list(userId='me', pageToken=page_token, q=query).execute()
         print(emails)
     print(f"final result {emails}")
+    batch = service.new_batch_http_request(callback=callback)
+    batch.execute()
