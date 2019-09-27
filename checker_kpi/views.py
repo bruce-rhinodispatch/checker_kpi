@@ -10,6 +10,7 @@ from django.contrib import messages
 from checker_kpi.checker_emails import CheckerEmails
 import pickle
 import os
+from google.auth.transport.requests import Request
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 @login_required
@@ -39,9 +40,22 @@ def company_emails(request, company_name, department='emails'):
                                                         'form': form})
             # если не для всех емейлов есть креды
             emails_to_check_with_creds =[]
+            with open(os.path.join(BASE_DIR, 'creds.pickle'), 'rb') as token:
+                creds_pickl = pickle.load(token)
+
+            rewrite_creds = False
+            for email in creds_pickl:
+                if creds_pickl[email].expired and creds_pickl[email].refresh_token:
+                    creds_pickl[email].refresh(Request())
+                    rewrite_creds = True
+            if rewrite_creds:
+                with open(os.path.join(BASE_DIR, 'creds.pickle'), 'wb') as token:
+                    pickle.dump(creds_pickl, token)
+
+
             for email in emails_to_check:
-                if email.creds == b"":
-                    messages.error(request, f"{email.email} hasn't been checked because we don't have credentials for this email")
+                if email.email not in creds_pickl or not creds_pickl[email.email].valid or (creds_pickl[email.email].expired and not creds_pickl[email.email].refresh_token):
+                    messages.error(request, f"{email.email} hasn't been checked because we don't have credentials or credentials expired for this email")
                 else:
                     emails_to_check_with_creds.append(email)
 
@@ -50,9 +64,11 @@ def company_emails(request, company_name, department='emails'):
             dispatchers_models = models.OperationsUsers.objects.filter(company=company_to_check)
             dispatchers_email = [{'nick': dispatcher.nick_name, 'amount': 0} for dispatcher in dispatchers_models]
             for email in emails_to_check_with_creds:
-                creds = pickle.loads(email.creds)
+                creds = creds_pickl[email.email]
+
                 checker = CheckerEmails(creds, email.email)
                 checker.check_emails_by_dispatchers(dispatchers_email, date_dict)
+                print(f"checking for {email.email} done")
 
 
 
@@ -85,10 +101,10 @@ def company_sylectus(request, company_name, department='sylectus'):
                  "-a", f"user_name={login_name}", "-a", f"user_pass={login_pass}"], cwd=directory)
 
             print(pipe)
-
             file_path = os.path.join(directory, "actions.pkl")
             with open(file_path, 'rb') as file:
                 result = pickle.load(file)
+            os.remove(file_path)
             company_to_check = models.Company.objects.get(name=company_name)
 
 
