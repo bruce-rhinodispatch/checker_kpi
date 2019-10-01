@@ -11,12 +11,14 @@ from pprint import pprint
 import datetime
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 global_variable_for_emails = []
+global_variable_for_errors = []
 
 def check_message(request_id, response, exception):
     global global_variable_for_emails
     if exception is None:
         global_variable_for_emails.append({'response': response, 'id': request_id})
     else:
+        print(request_id)
         print(exception)
 
 
@@ -151,7 +153,7 @@ class CheckerEmails:
                     for dispatcher in dispatchers:
                         if dispatcher['nick'] in cleared_body:
                             dispatcher['amount'] += 1
-
+            print(dispatchers)
             checked += len(mails_raw['messages'])
             global_variable_for_emails = []
             print(f"checked {checked} from {estimate_emails}")
