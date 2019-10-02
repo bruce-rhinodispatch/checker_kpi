@@ -25,7 +25,7 @@ SECRET_KEY = 'o153**%h$!6l()u1dp!io08+*rbg361vlrmvbg0zn+j8lmz$2y'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['ec2-52-14-85-116.us-east-2.compute.amazonaws.com', '127.0.0.1']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'localusers',
     'checker_kpi',
-
+    'channels'
 ]
 
 SITE_ID = 1
