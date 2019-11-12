@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'localusers',
     'checker_kpi',
-    'channels'
+    'channels',
+    'django_extensions',  # для запуска сервера через https runserver - можно удалить в проде
 ]
 
 SITE_ID = 1
@@ -76,8 +77,7 @@ TEMPLATES = [
         },
     },
 ]
-
-WSGI_APPLICATION = 'sylectus_site.wsgi.application'
+ASGI_APPLICATION = "sylectus_site.routing.application"
 
 
 # Database
