@@ -3,7 +3,7 @@
     {% for item in navigation_departments %}
     
     {% if item == department_selected %}
-    <li class="tab"><a class ="active indigo-text"target="_self" href="{{ company.get_absolute_url}}/{{item}}" id="{{item}}">{{item}}</a></li>
+    <li class="tab"><a class ="active indigo-text" target="_self" href="{{ company.get_absolute_url}}/{{item}}" id="{{item}}">{{item}}</a></li>
     {% else %}
     <li class="tab"><a class="indigo-text text-darken-2" target="_self" href="{{ company.get_absolute_url}}/{{item}}" id="{{item}}" >{{item}}</a></li>
     {% endif %}
@@ -11,9 +11,11 @@
   </ul>
  
   <script>
+
     $(document).ready(function(){
       $('.tabs').tabs();
     });
+
   </script>
   
 
