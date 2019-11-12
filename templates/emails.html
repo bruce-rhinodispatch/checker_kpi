@@ -1,10 +1,12 @@
 {% load render_sample %}
 {% render_sample  template="date_form.html" form=form %}
-
-{% if dispatchers_email %}
-  <div class="row" id="wrapper_table_emails">
-   <table class="striped centered col s6 offset-s3">
-   <thead>
+<p id="message"></p>
+<div class="progress" id="progressBar">
+    <div class="indeterminate"></div>
+</div>
+<div class="row" id="wrapper_table_emails" style="display: none">
+    <table class="striped centered col s6 offset-s3">
+    <thead>
     <th>Nickname</th>
     <th>Amount of sent emails</th>
     </thead>
@@ -16,4 +18,62 @@
     {% endfor %}
     </table>
 </div>
-{% endif %}
+
+
+<script>
+    const wsStart = location.protocol === 'https:' ? "wss://": "ws://";
+    const comoanyName = location.pathname.split('/')[2];
+    const endpoint = `${wsStart}${location.host}/socket/company/${comoanyName}/emails`;
+    const socket = new WebSocket(endpoint);
+    const progressBar = document.getElementById("progressBar");
+    const runBtnWrapper = document.getElementById('run-btn-wrapper');
+    const runBtn = document.getElementById('btn-run-script');
+    const runFrom = document.getElementById('form-run-script');
+    const start_from = document.getElementById('start');
+    const end_from = document.getElementById('end');
+    const logEvent = e => {
+    };
+
+    const messageFromCheckerEmails = info => {
+        let message = document.getElementById("message");
+        let progressLine = document.getElementById("progressBar").querySelector('div');
+        progressLine.className = "determinate";
+        let percents = info['already_checked_emails'] / info['total_to_check_emails'];
+        progressLine.style.width = percents * 100 + "%";
+        message.innerText = ` ${info['current_message']} (${info['already_checked_boxes']} from ${info['boxes_to_check']}) emails ${info['already_checked_emails']} from ${info['total_to_check_emails']}`;
+        if (info['current_message']==="finish"){
+            runBtnWrapper.style.display = "block";
+            progressBar.style.display = "none";
+            Materialize.toast("All emails have been checked!",6000, 'green rounded');
+        }
+    };
+
+
+    const onMessageReceive = e => {
+        let info = JSON.parse(e.data);
+        if (info.type === 'checker of emails'){
+            console.log(info);
+            messageFromCheckerEmails(info);
+
+        }
+    };
+
+    const runScript = event => {
+        if (start_from.checkValidity()&&end_from.checkValidity()) {
+            console.log('script is starting');
+            runBtnWrapper.style.display = "none";
+            progressBar.style.display = "block";
+            socket.send(JSON.stringify({
+                'type':'start_script_emails',
+                'start':start_from.value,
+                'end':end_from.value}));
+            event.preventDefault();}
+
+    };
+
+    socket.addEventListener('message', onMessageReceive);
+    socket.addEventListener('open', logEvent);
+    socket.addEventListener('close', logEvent);
+    socket.addEventListener('error', logEvent);
+    runBtn.addEventListener('click', runScript);
+</script>
