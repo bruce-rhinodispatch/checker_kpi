@@ -1,55 +1,58 @@
 {% load render_sample %}
 {% load if_none_set_0 %}
+{% load static %}
 {% render_sample  template="date_form.html" form=form %}
 
 {% if dispatchers_sylectus %}
-  <div class="row" id="wrapper_table_sylectus">
-   <table class="striped centered">
-   <thead>
-   <th>Nickname</th>
-    <th>Arrive Consignee</th>
-    <th>Arrived Shipper</th>
-    <th>Cancel Order</th>
-    <th>Cancel Travel Order</th>
-    <th>Change Auth Company</th>
-    <th>Change Pay Driver</th>
-    <th>Change PD Customer</th>
-    <th>Change PH Bill To</th>
-    <th>Change Ref# 1</th>
-    <th>Chg Split Location</th>
-    <th>Dispatched</th>
-    <th>Empty </th>
-    <th>ETA Changed</th>
-    <th>Loaded</th>
-    <th>Order Created</th>
-    <th>Order Updated</th>
-    <th>Split Pro After Dispatch</th>
-    <th>Total</th>
-    </thead>
-    {% for dispatcher in dispatchers_sylectus %}
-    <tr>
-           <td>{{dispatcher.nick}}</td>
-           <td>{{dispatcher.actions.Arrive_Consignee|if_none_set_0}}</td>
-           <td>{{dispatcher.actions.Arrived_Shipper|if_none_set_0}}</td>
-           <td>{{dispatcher.actions.Cancel_Order|if_none_set_0}}</td>
-           <td>{{dispatcher.actions.Cancel_Travel_Order|if_none_set_0}}</td>
-           <td>{{dispatcher.actions.Change_Auth_Company|if_none_set_0}}</td>
-           <td>{{dispatcher.actions.Change_Pay_Driver|if_none_set_0}}</td>
-           <td>{{dispatcher.actions.Change_PD_Customer|if_none_set_0}}</td>
-           <td>{{dispatcher.actions.Change_PH_Bill_To|if_none_set_0}}</td>
-           <td>{{dispatcher.actions.Change_Ref_1|if_none_set_0}}</td>
-           <td>{{dispatcher.actions.Chg_Split_Location|if_none_set_0}}</td>
-           <td>{{dispatcher.actions.Dispatched|if_none_set_0}}</td>
-           <td>{{dispatcher.actions.Empty|if_none_set_0}}</td>
-           <td>{{dispatcher.actions.ETA_Changed|if_none_set_0}}</td>
-           <td>{{dispatcher.actions.Loaded|if_none_set_0}}</td>
-           <td>{{dispatcher.actions.Order_Created|if_none_set_0}}</td>
-           <td>{{dispatcher.actions.Order_Updated|if_none_set_0}}</td>
-           <td>{{dispatcher.actions.Split_Pro_After_Dispatch|if_none_set_0}}</td>
-           <td>{{dispatcher.actions.Total|if_none_set_0}}</td>
+<div class="row" id="wrapper_table_sylectus">
+       <table class="striped centered">
+       <thead>
+       <th>Nickname</th>
+       <th>Arrive Consignee</th>
+       <th>Arrived Shipper</th>
+       <th>Cancel Order</th>
+       <th>Cancel Travel Order</th>
+       <th>Change Auth Company</th>
+       <th>Change Pay Driver</th>
+       <th>Change PD Customer</th>
+       <th>Change PH Bill To</th>
+       <th>Change Ref# 1</th>
+       <th>Chg Split Location</th>
+       <th>Dispatched</th>
+       <th>Empty </th>
+       <th>ETA Changed</th>
+       <th>Loaded</th>
+       <th>Order Created</th>
+       <th>Order Updated</th>
+       <th>Split Pro After Dispatch</th>
+       <th onclick="filter('total')">Total</th>
+       </thead>
+       {% for dispatcher in dispatchers_sylectus %}
+       <tr>
+       <td>{{dispatcher.nick}}</td>
+       <td>{{dispatcher.actions.Arrive_Consignee|if_none_set_0}}</td>
+       <td>{{dispatcher.actions.Arrived_Shipper|if_none_set_0}}</td>
+       <td>{{dispatcher.actions.Cancel_Order|if_none_set_0}}</td>
+       <td>{{dispatcher.actions.Cancel_Travel_Order|if_none_set_0}}</td>
+       <td>{{dispatcher.actions.Change_Auth_Company|if_none_set_0}}</td>
+       <td>{{dispatcher.actions.Change_Pay_Driver|if_none_set_0}}</td>
+       <td>{{dispatcher.actions.Change_PD_Customer|if_none_set_0}}</td>
+       <td>{{dispatcher.actions.Change_PH_Bill_To|if_none_set_0}}</td>
+       <td>{{dispatcher.actions.Change_Ref_1|if_none_set_0}}</td>
+       <td>{{dispatcher.actions.Chg_Split_Location|if_none_set_0}}</td>
+       <td>{{dispatcher.actions.Dispatched|if_none_set_0}}</td>
+       <td>{{dispatcher.actions.Empty|if_none_set_0}}</td>
+       <td>{{dispatcher.actions.ETA_Changed|if_none_set_0}}</td>
+       <td>{{dispatcher.actions.Loaded|if_none_set_0}}</td>
+       <td>{{dispatcher.actions.Order_Created|if_none_set_0}}</td>
+       <td>{{dispatcher.actions.Order_Updated|if_none_set_0}}</td>
+       <td>{{dispatcher.actions.Split_Pro_After_Dispatch|if_none_set_0}}</td>
+       <td>{{dispatcher.actions.Total|if_none_set_0}}</td>
 
-    </tr>
-    {% endfor %}
-    </table>
+       </tr>
+       {% endfor %}
+       </table>
 </div>
+<button>Filter</button>
 {% endif %}
+<script src= {% static "JS\sylectus.js" %} type="text/javascript"></script>
