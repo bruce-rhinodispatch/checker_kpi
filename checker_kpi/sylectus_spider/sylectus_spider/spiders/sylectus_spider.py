@@ -97,6 +97,7 @@ class SylectusSpider(scrapy.Spider):
             actions_by_user[user][action] = amount + 1
         with open('actions.pkl', 'wb') as file:
             pickle.dump(actions_by_user, file)
+        print('Done')
 
     # @staticmethod
     # def write_to_html(response):
