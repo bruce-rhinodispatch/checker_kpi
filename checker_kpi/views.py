@@ -1,15 +1,20 @@
 import subprocess
-
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from .forms import DateForm
-from checker_kpi.models import Company
+from checker_kpi.models import Company, Emails
 from . import models
-from django.contrib import messages
+from django.urls import reverse
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import Flow
 from checker_kpi.checker_emails import CheckerEmails
-import pickle
+from django.http import HttpResponseRedirect, HttpResponse
+from sylectus_site import config_private
+from sylectus_site.config import google_config
 import os
+from googleapiclient.discovery import build
+import pickle
 from google.auth.transport.requests import Request
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -24,64 +29,43 @@ def main(request, company_name=None):
 @login_required
 def company_emails(request, company_name, department='emails'):
     dispatchers_email = None
-    if request.method == "POST":
-        form = DateForm(request.POST)
-        if form.is_valid():
-            date_dict = form.cleaned_data
+    # проверяем если все норм с кредами
+    company_to_check = models.Company.objects.get(name=company_name)
+    emails_to_check = Emails.objects.filter(company=company_to_check)
+    # проверяем есть ли креды
+    for email_model in emails_to_check:
+        creds = Credentials(token=email_model.token,
+                            refresh_token=email_model.refresh_token,
+                            token_uri=google_config['token_uri'],
+                            client_id=google_config['client_id'],
+                            client_secret=google_config['client_secret'],
+                            scopes=['https://www.googleapis.com/auth/spreadsheets'])
+        #проверяем все ли ок с кердами, если нет - выводим линк для получения кредов
+        try:
+            if not creds.valid or creds.token == "" or creds.refresh_token == "":
+                raise Exception('not valid or empty creds')
+            if creds.expired:
+                creds.refresh(Request())
+                email_model.token = creds.token
+                email_model.save()
+        except Exception:
+            # если проблема с кредами - редиректим на страницу где есть линк на разрешить доступ и
+            # название емейла для кого
+            return render(request, "settings.html", {'main_nav_element': 'Settings',
+                                                     "redirect_for": email_model.email})
 
-            #достаем все екземпляры моделей с емейлами
-            company_to_check = models.Company.objects.get(name=company_name)
-            emails_to_check = models.Emails.objects.filter(company=company_to_check)
-            # если емейла для проверок нет - выводим на екран
-            if len(emails_to_check) == 0:
-                messages.error(request, f'There is no emails for the company "{company_name}"')
-                return render(request, 'company.html', {'main_nav_element': company_name,
-                                                        'second_nav_element': department,
-                                                        'form': form})
-            # если не для всех емейлов есть креды
-            emails_to_check_with_creds =[]
-            with open(os.path.join(BASE_DIR, 'creds.pickle'), 'rb') as token:
-                creds_pickl = pickle.load(token)
+    form = DateForm()
 
-            rewrite_creds = False
-            for email in creds_pickl:
-                if creds_pickl[email].expired and creds_pickl[email].refresh_token:
-                    creds_pickl[email].refresh(Request())
-                    rewrite_creds = True
-            if rewrite_creds:
-                with open(os.path.join(BASE_DIR, 'creds.pickle'), 'wb') as token:
-                    pickle.dump(creds_pickl, token)
-
-
-            for email in emails_to_check:
-                if email.email not in creds_pickl or not creds_pickl[email.email].valid or (creds_pickl[email.email].expired and not creds_pickl[email.email].refresh_token):
-                    messages.error(request, f"{email.email} hasn't been checked because we don't have credentials or credentials expired for this email")
-                else:
-                    emails_to_check_with_creds.append(email)
-
-            # достаем диспетчеров которые работают в данной компании
-            # и для каждого емейла который подкреплен к этой компании вызываем проверку
-            dispatchers_models = models.OperationsUsers.objects.filter(company=company_to_check)
-            dispatchers_email = [{'nick': dispatcher.nick_name, 'amount': 0} for dispatcher in dispatchers_models]
-            for email in emails_to_check_with_creds:
-                print(f"checking for {email.email}")
-                creds = creds_pickl[email.email]
-                checker = CheckerEmails(creds, email.email)
-                checker.check_emails_by_dispatchers(dispatchers_email, date_dict)
-
-
-
-
-    else:
-        form = DateForm()
     return render(request, 'company.html', {'main_nav_element': company_name,
-                                            'second_nav_element': department,
-                                            'form': form,
-                                            'dispatchers_email': dispatchers_email})
+                                    'second_nav_element': department,
+                                    'form': form,
+                                    'dispatchers_email': dispatchers_email})
+
 
 @login_required
 def company_sylectus(request, company_name, department='sylectus'):
     dispatchers_sylectus = None
+    company_to_check = models.Company.objects.get(name=company_name)
     if request.method == "POST":
         form = DateForm(request.POST)
         if form.is_valid():
@@ -100,20 +84,17 @@ def company_sylectus(request, company_name, department='sylectus'):
                  f"corporate_id={corporate_id}",
                  "-a", f"user_name={login_name}", "-a", f"user_pass={login_pass}"], cwd=directory)
 
-            print(pipe)
             file_path = os.path.join(directory, "actions.pkl")
             with open(file_path, 'rb') as file:
                 result = pickle.load(file)
             os.remove(file_path)
-            company_to_check = models.Company.objects.get(name=company_name)
+
 
 
             dispatchers = models.SylectusUsers.objects.filter(company=company_to_check)
             dispatchers = [dispatcher.name for dispatcher in dispatchers]
 
             dispatchers_sylectus = [{'nick': dispatcher, 'actions': result.get(dispatcher, None)} for dispatcher in dispatchers]
-
-
 
     else:
         form = DateForm()
@@ -124,10 +105,52 @@ def company_sylectus(request, company_name, department='sylectus'):
                                             'dispatchers_sylectus': dispatchers_sylectus})
 @login_required
 def settings(request):
+    print('settings state')
+    print(request.session['state'])
     return render(request, 'settings.html', {'main_nav_element': 'Settings'})
 
 
+@login_required
+def set_creds(request, ):
+    print(f'setting creds ')
+
+    dir_name = os.path.join(os.path.dirname(__file__))
+    flow = Flow.from_client_secrets_file(
+        os.path.join(dir_name, 'credentials.json'), google_config['scopes'])
+    flow.redirect_uri = f'{config_private.hostname}/catch_creds'
+    authorization_url, state = flow.authorization_url(access_type='offline',
+                                                      include_granted_scopes='true')
+    request.session['code_verifier'] = flow.code_verifier
+    request.session['state'] = state
+    print(f" set creds - state:{state}, code:{flow.code_verifier}")
+    return HttpResponseRedirect(authorization_url)
+
+@login_required
+def catch_creds(request):
+    dir_name = os.path.join(os.path.dirname(__file__))
+    state = request.session['state']
+    code_verifier = request.session['code_verifier']
+    print(f" catch creds - state:{state}, code:{code_verifier}")
+    flow = Flow.from_client_secrets_file(
+        os.path.join(dir_name,  'credentials.json'),
+        scopes=google_config['scopes'],
+        state=state)
+    flow.redirect_uri = f'{config_private.hostname}/catch_creds'
+    flow.code_verifier = code_verifier
+    authorization_response = request.build_absolute_uri()
+    flow.fetch_token(authorization_response=authorization_response)
+    creds = flow.credentials
+    service = build('gmail', 'v1', credentials=creds, cache_discovery=False)
+    email_from_creds = service.users().getProfile(userId='me').execute()['emailAddress']
+
+    email_model = Emails.objects.get(email=email_from_creds)
+
+    email_model.refresh_token = creds.refresh_token
+    email_model.token = creds.token
+    email_model.save()
+    return HttpResponseRedirect(reverse('main'))
+
 def test(request):
-    form = DateForm()
-    return render(request, 'test.html', {'form': form})
+    data = {'aa': 11, "bb": 22}
+    return JsonResponse(data, safe=False)
 
