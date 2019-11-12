@@ -1,4 +1,11 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block content %}
 
+{% if redirect_for %}
+    <p> You have to update/get credentials for <a href="{% url 'set_creds' %}">{{ redirect_for }}</a></p>
+
+{% endif %}
+
 {% endblock %}
+
