@@ -109,4 +109,4 @@ localusers/migrations/
 users/migrations
 checker_kpi/migrations/
 checker_kpi\migrations
-checker_kpi/migrations/0001_initial.py
+checker_kpi/migrations/*.py
