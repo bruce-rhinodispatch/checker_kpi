@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
-
+from sylectus_site import config_private
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -20,7 +20,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'o153**%h$!6l()u1dp!io08+*rbg361vlrmvbg0zn+j8lmz$2y'
+SECRET_KEY = config_private.SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -41,9 +41,9 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    'checker_kpi',
     'channels',
     'localusers',
+    'checker_kpi',
     'django_extensions',  # для запуска сервера через https runserver - можно удалить в проде
 ]
 
@@ -149,3 +149,5 @@ LOGIN_REDIRECT_URL = '/'
 ACCOUNT_USERNAME_REQUIRED = False
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 AUTH_USER_MODEL = 'localusers.LocalUser'
+
+
