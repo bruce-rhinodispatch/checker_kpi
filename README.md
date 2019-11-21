@@ -32,6 +32,10 @@ pip3 install -r requirements.txt
 
 7. Create/update  db
 ```bash
+python3 manage.py makemigrations checker_kpi
+python3 manage.py makemigrations localusers
+python3 manage.py migrate checker_kpi
+python3 manage.py migrate localusers
 python3 manage.py makemigrations
 python3 manage.py migrate
 ```
@@ -41,6 +45,8 @@ python3 manage.py migrate
 cd checker_kpi/sylectus_spider/sylectus_spider 
 scrapyrt
 ```
+
+9. Set hostnme in sylectus_site/config_private.py
 
 # update
 
