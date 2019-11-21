@@ -10,7 +10,7 @@ git clone https://github.com/bruce-rhinodispatch/checker_kpi.git
 cd checker-kpi
 ```
 
-3.Install venv
+3. Install venv
 ```bash
 sudo apt install python3-venv
 ```
