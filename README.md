@@ -30,14 +30,35 @@ source venv/bin/activate
 pip3 install -r requirements.txt
 ```
 
-7. create db
+7. run scrapyrt
+```bash
+cd checker_kpi/sylectus_spider/sylectus_spider 
+scrapyrt
+```
+
+# update
+
+1. Go to project folder
+```bash
+cd checker-kpi
+```
+2. pull  changes
+```bash
+git pull 
+```
+
+3.activate venv
+```bash
+source venv/bin/activate 
+```
+
+4.install requeriments
+```bash
+pip3 install -r requirements.txt
+```
+
+5. update  db
 ```bash
 python3 manage.py makemigrations
 python3 manage.py migrate
 ```
-
-8. create superuser
-```bash
-python3 manage.py createsuperuser
-```
-
