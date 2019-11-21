@@ -107,7 +107,6 @@ cert.key
 checker_kpi/sylectus_spider/sylectus_spider.html
 localusers/migrations/
 users/migrations
-checker_kpi/migrations/
+checker_kpi/migrations
 checker_kpi/migrations/*.py
-checker_kpi/migrations/0001_initial.py
-checker_kpi/migrations/0001_initial.py
+
