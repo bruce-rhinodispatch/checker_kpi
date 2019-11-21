@@ -46,6 +46,8 @@ cd checker_kpi/sylectus_spider/sylectus_spider
 scrapyrt
 ```
 
+9. Set hostnme in sylectus_site/config_private.py
+
 # update
 
 1. Go to project folder
