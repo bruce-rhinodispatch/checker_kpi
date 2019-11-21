@@ -31,8 +31,8 @@ class Emails(models.Model):
     company = models.ForeignKey(Company, on_delete=models.PROTECT)
     email = models.CharField(max_length=40, blank=False, unique=True)
     check_for_this_email = models.BooleanField(blank=False, default=True)
-    token = models.CharField(default="", max_length=70)
-    refresh_token = models.CharField(default="", max_length=70)
+    token = models.CharField(default="", max_length=70, blank=True)
+    refresh_token = models.CharField(default="", max_length=70, blank=True)
 
     class Meta:
         constraints = [
