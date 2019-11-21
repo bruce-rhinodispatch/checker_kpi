@@ -105,3 +105,4 @@ venv.bak/
 .mypy_cache/
 cert.crt
 cert.key
+checker_kpi/sylectus_spider/sylectus_spider.html
