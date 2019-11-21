@@ -43,7 +43,6 @@ def get_body_from_part(part):
     return ''
 
 
-
 class CheckerEmails:
     def __init__(self, creds, email, info_from_thread):
         self._service = build('gmail', 'v1', credentials=creds)
@@ -102,7 +101,7 @@ class CheckerEmails:
         # если ничего не нашло
         if mails_raw['resultSizeEstimate'] == 0:
             print(f'nothing for {self._email}')
-            return dispatchers
+            return
         estimate_emails = mails_raw["resultSizeEstimate"]
         self._info_from_thread['total_to_check_emails'] = estimate_emails
         checked = 0
@@ -147,3 +146,5 @@ class CheckerEmails:
             # если есть - повторяем
             page_token = mails_raw['nextPageToken']
             mails_raw = self._service.users().messages().list(userId='me', pageToken=page_token, q=query).execute()
+        self._info_from_thread['total_checked_emails'] += checked
+
