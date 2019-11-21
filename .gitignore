@@ -110,3 +110,4 @@ users/migrations
 checker_kpi/migrations
 checker_kpi/migrations/*.py
 
+*.py
