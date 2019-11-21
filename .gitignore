@@ -110,3 +110,11 @@ users/migrations
 checker_kpi/migrations/
 checker_kpi\migrations
 checker_kpi/migrations/*.py
+checker_kpi/migrations/0001_initial.py
+checker_kpi/migrations/0002_auto_20190828_1256.py
+checker_kpi/migrations/0003_auto_20190829_0856.py
+checker_kpi/migrations/0004_emails_check_for_this_email.py
+checker_kpi/migrations/0005_auto_20190903_0615.py
+checker_kpi/migrations/0006_auto_20190903_0629.py
+checker_kpi/migrations/0007_remove_emails_creds.py
+checker_kpi/migrations/0008_auto_20191112_0917.py
