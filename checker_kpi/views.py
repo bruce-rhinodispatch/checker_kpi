@@ -23,12 +23,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 @login_required
 def main(request, company_name=None):
     if company_name is None:
-        company_name = Company.objects.filter(id=1)
-        print(company_name)
-        if len(company_name) != 0:
-            company_name = company_name.name
-        else:
-            company_name = None
+        company_name = Company.objects.get(id=1).name
     return redirect('company_sylectus',  company_name)
 
 
