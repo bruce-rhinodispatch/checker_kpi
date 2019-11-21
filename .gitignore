@@ -105,3 +105,4 @@ venv.bak/
 cert.crt
 cert.key
 checker_kpi/sylectus_spider/sylectus_spider.html
+users/migrations
