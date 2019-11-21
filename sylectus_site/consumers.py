@@ -5,9 +5,7 @@ import time
 import _thread as thread
 from google.oauth2.credentials import Credentials
 from channels.consumer import AsyncConsumer, SyncConsumer
-from channels.db import database_sync_to_async
 from checker_kpi.models import Company, Emails, OperationsUsers
-from checker_kpi.API import ApiEmails
 from checker_kpi.checker_emails import CheckerEmails
 from sylectus_site.config import google_config
 
@@ -39,21 +37,19 @@ class EmailsConsumer(SyncConsumer):
                     self.send({
                         'type': 'websocket.send',
                         'text': json.dumps({'type': 'checker of emails',
-                                            'current_message': info['current_message'],
-                                            'already_checked_boxes': info['already_checked_boxes'],
-                                            'boxes_to_check': info['boxes_to_check'],
-                                            'already_checked_emails': info["already_checked_emails"],
-                                            'total_to_check_emails': info['total_to_check_emails'],
-                                            'state': info['state'],
-                                            })
+                                            'data': info})
                     })
 
                     if info['state'] == "finish":
                         break
                     time.sleep(1)
+                self.send({
+                    'type': 'websocket.send',
+                    'text': json.dumps({'type': 'checker of emails',
+                                        'data': info})
+                })
 
     def start_script(self, company, dates):
-
         emails__models_to_check = Emails.objects.filter(company=company)
         checker = EmailApi(company, dates)
         info = checker.get_info()
@@ -71,10 +67,11 @@ class EmailApi:
         self._dates = dates
         self.info = {'current_message': 'Start checking',
                      'state': "in_progress",
-                     'already_checked_boxes': 1,
+                     'current_box_number': 1,
                      'boxes_to_check': None,
                      'already_checked_emails': 0,
-                     'total_to_check_emails': None}
+                     'total_to_check_emails': None,
+                     'total_checked_emails': 0}
 
     def get_info(self):
         return self.info
@@ -83,8 +80,11 @@ class EmailApi:
         dispatchers_models = OperationsUsers.objects.filter(company=self._company_to_check)
         dispatchers_email = [{'nick': dispatcher.nick_name, 'amount': 0} for dispatcher in dispatchers_models]
         self.info['boxes_to_check'] = len(emails_models_to_check)
-        checked_boxes = 1
+        current_box = 0
+        print(f"boxes to check {emails_models_to_check}")
         for email_model in emails_models_to_check:
+            current_box += 1
+            self.info['current_box_number'] = current_box
             self.info['current_message'] = f"Checking {email_model.email}"
             creds = Credentials(token=email_model.token,
                                 refresh_token=email_model.refresh_token,
@@ -94,9 +94,10 @@ class EmailApi:
                                 scopes=['https://www.googleapis.com/auth/spreadsheets'])
             checker = CheckerEmails(creds, email_model.email, self.info)
             checker.check_emails_by_dispatchers(dispatchers_email, self._dates)
-            checked_boxes += 1
-            self.info['already_checked_boxes'] = checked_boxes
+
+        self.info['dispatchers'] = dispatchers_email
         self.info['state'] = "finish"
+
         print('finish')
 
 
