@@ -16,13 +16,15 @@ import os
 from googleapiclient.discovery import build
 import pickle
 from google.auth.transport.requests import Request
+import requests
+from django.contrib import messages
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 @login_required
 def main(request, company_name=None):
     if company_name is None:
         company_name = Company.objects.get(id=1).name
-    return redirect('company_emails',  company_name)
+    return redirect('company_sylectus',  company_name)
 
 
 
@@ -77,24 +79,29 @@ def company_sylectus(request, company_name, department='sylectus'):
             login_pass = company_model.login_pass
             start = date_dict['start'].strftime('%m/%d/%Y')
             end = date_dict['end'].strftime('%m/%d/%Y')
-
-            directory = os.path.join(BASE_DIR, 'sylectus_spider', 'sylectus_spider', 'spiders')
-            pipe = subprocess.call(
-                ["scrapy", "crawl", "sylectus_spider", "-a", f"date_start={start}", "-a", f"date_end={end}", "-a",
-                 f"corporate_id={corporate_id}",
-                 "-a", f"user_name={login_name}", "-a", f"user_pass={login_pass}"], cwd=directory)
-
-            file_path = os.path.join(directory, "actions.pkl")
-            with open(file_path, 'rb') as file:
-                result = pickle.load(file)
-            os.remove(file_path)
-
-
-
-            dispatchers = models.SylectusUsers.objects.filter(company=company_to_check)
-            dispatchers = [dispatcher.name for dispatcher in dispatchers]
-
-            dispatchers_sylectus = [{'nick': dispatcher, 'actions': result.get(dispatcher, None)} for dispatcher in dispatchers]
+            JSON_OBJ = {
+                "request": {
+                    "url": "https://www.sylectus.com/Login.aspx",
+                    "meta": {
+                        "corporate_id": str(corporate_id),
+                        "user_name": str(login_name),
+                        "date_start": start,
+                        "date_end": end,
+                        "user_pass": str(login_pass)
+                    }
+                },
+                "spider_name": "sylectus_spider"
+            }
+            response = requests.post("http://localhost:9080/crawl.json", json=JSON_OBJ)
+            dict_from_scrapy = response.json()['items'][0]
+            if 'Error' not in dict_from_scrapy:
+                dispatchers = models.SylectusUsers.objects.filter(company=company_to_check)
+                dispatchers = [dispatcher.name for dispatcher in dispatchers]
+                dispatchers_sylectus = [{'nick': dispatcher, 'actions': dict_from_scrapy.get(dispatcher, None)}
+                                        for dispatcher in dispatchers]
+            else:
+                print('error')
+                messages.error(request, dict_from_scrapy['Error'])
 
     else:
         form = DateForm()
@@ -105,8 +112,6 @@ def company_sylectus(request, company_name, department='sylectus'):
                                             'dispatchers_sylectus': dispatchers_sylectus})
 @login_required
 def settings(request):
-    print('settings state')
-    print(request.session['state'])
     return render(request, 'settings.html', {'main_nav_element': 'Settings'})
 
 
