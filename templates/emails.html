@@ -1,22 +1,21 @@
 {% load render_sample %}
 {% render_sample  template="date_form.html" form=form %}
-<p id="message"></p>
+<div id="text_container">
+    <p id="message" style="text-align: center"></p>
+</div>
+
 <div class="progress" id="progressBar">
     <div class="indeterminate"></div>
 </div>
 <div class="row" id="wrapper_table_emails" style="display: none">
     <table class="striped centered col s6 offset-s3">
-    <thead>
-    <th>Nickname</th>
-    <th>Amount of sent emails</th>
-    </thead>
-    {% for dispatcher in dispatchers_email %}
-    <tr>
-        <td>{{dispatcher.nick}}</td>
-        <td>{{dispatcher.amount}}</td>
-    </tr>
-    {% endfor %}
+        <thead>
+            <th>Nickname</th>
+            <th>Amount of sent emails</th>
+        </thead>
+            <tbody></tbody>
     </table>
+
 </div>
 
 
@@ -31,6 +30,9 @@
     const runFrom = document.getElementById('form-run-script');
     const start_from = document.getElementById('start');
     const end_from = document.getElementById('end');
+    let wrapper_table = document.getElementById('wrapper_table_emails');
+    let table = wrapper_table.querySelector("table");
+    let table_body = table.querySelector('tbody');
     const logEvent = e => {
     };
 
@@ -40,11 +42,28 @@
         progressLine.className = "determinate";
         let percents = info['already_checked_emails'] / info['total_to_check_emails'];
         progressLine.style.width = percents * 100 + "%";
-        message.innerText = ` ${info['current_message']} (${info['already_checked_boxes']} from ${info['boxes_to_check']}) emails ${info['already_checked_emails']} from ${info['total_to_check_emails']}`;
-        if (info['current_message']==="finish"){
+        message.innerText = ` ${info['current_message']} (${info['current_box_number']} from ${info['boxes_to_check']}) emails ${info['already_checked_emails']} from estimate ${info['total_to_check_emails']}`;
+        if (info['state']==="finish"){
+            console.log('finished');
             runBtnWrapper.style.display = "block";
             progressBar.style.display = "none";
-            Materialize.toast("All emails have been checked!",6000, 'green rounded');
+            message.innerText = `Total checked emails ${info['total_checked_emails']}`;
+            wrapper_table.style.display = 'block';
+            console.log(info['dispatchers']);
+
+            for (let dict of info['dispatchers']) {
+                console.log(`disp:${dict['nick']} amount ${dict['amount']}`);
+                let tr = document.createElement("tr");
+                let first_td =  document.createElement("td");
+                let second_td =  document.createElement("td");
+                first_td.innerHTML =dict['nick'];
+                second_td.innerHTML = dict['amount'];
+                tr.append(first_td, second_td);
+                table_body.append(tr)
+            }
+            wrapper_table.style.display = 'block';
+            {#Materialize.toast("All emails have been checked!",6000, 'green rounded');#}
+
         }
     };
 
@@ -53,7 +72,7 @@
         let info = JSON.parse(e.data);
         if (info.type === 'checker of emails'){
             console.log(info);
-            messageFromCheckerEmails(info);
+            messageFromCheckerEmails(info['data']);
 
         }
     };
@@ -63,11 +82,16 @@
             console.log('script is starting');
             runBtnWrapper.style.display = "none";
             progressBar.style.display = "block";
+            progressBar.style.display = "block";
+            const firstRow = table.rows[0];
+            table_body.innerHTML = '';
+            wrapper_table.style.display = 'none';
             socket.send(JSON.stringify({
                 'type':'start_script_emails',
                 'start':start_from.value,
                 'end':end_from.value}));
             event.preventDefault();}
+
 
     };
 
