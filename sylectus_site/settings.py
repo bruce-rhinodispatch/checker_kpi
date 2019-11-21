@@ -41,9 +41,9 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    'localusers',
     'checker_kpi',
     'channels',
+    'localusers',
     'django_extensions',  # для запуска сервера через https runserver - можно удалить в проде
 ]
 
